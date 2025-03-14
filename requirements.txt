@@ -1,4 +1,4 @@
 # https://www.youtube.com/watch?v=XnYYwcOfcn8&list=PLqAmigZvYxIL9dnYeZEhMoHcoP4zop8-p&ab_channel=JVPDesign
-
 fastapi
 uvicorn[standard]
+python-multipart
