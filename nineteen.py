@@ -1,10 +1,18 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, PlainTextResponse
+from pydantic import BaseModel
+from fastapi.exception_handlers import http_exception_handler, request_validation_exception_handler
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 app = FastAPI()
+
+
+@app.get("/")
+async def root():
+    return "Hello world"
 
 
 items = {"foo":"The Foo Wrestlers"}
@@ -54,3 +62,40 @@ async def read_unicrons(name: str):
 #     if item_id == 3:
 #         raise HTTPException(status_code=418, detail="Nope! I don't like 3.")
 #     return {"item_id":item_id}
+
+
+# @app.exception_handler(RequestValidationError)
+# async def validation_exception_handler(
+#     request: Request, 
+#     exc: RequestValidationError
+# ):
+#     return JSONResponse(status_code=422, content=jsonable_encoder({"detail":exc.errors(), "blablabla": exc.body}))
+
+
+# class Item(BaseModel):
+#     title: str
+#     size: int
+
+
+# @app.post("/items/")
+# async def create_item(item:Item):
+#     return item
+
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request, exc):
+    print(f"OMG an HTTP error!: {repr(exc)}")
+    return await http_exception_handler(request, exc)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    print(f"OMG! The client sent invalid data!: {exc}")
+    return await request_validation_exception_handler(request, exc)
+
+
+@app.get("/blah_item/{item_id}")
+async def read_item(item_id: int):
+    if item_id == 3:
+        raise HTTPException(status_code=418, detail="Nope! I don't like 3")
+    return {"item_id": item_id}
